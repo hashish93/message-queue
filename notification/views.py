@@ -1,10 +1,8 @@
 from rest_framework import viewsets
 from .models import Notification
 from .serializers import NotificationSerializer
-import redis
 import json
 from .redisConfig import RedisWrapper
-# Create your views here.
 
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
@@ -15,7 +13,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
             notification = Notification()
             notification.user_id = id
             notification.message = obj['message']
-            notification.is_read = False
             try:
                 NotificationViewSet.perform_create(NotificationViewSet, notification)
             except Exception as e:
@@ -27,7 +24,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if(serializer):
             obj = serializer.save()
-
         return obj
 
     def pushNotification(self, obj):
@@ -39,8 +35,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
         try:
             r_server = RedisWrapper().redis_connect(server_key='local_server')
             r_server.ping()
-
-            # r = redis.StrictRedis(host='localhost', port=6379, db=0)
             r_server.publish('notification', json.dumps(response_data))
         except Exception:
             print('cannot connect to redis server')
