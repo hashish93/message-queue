@@ -1,10 +1,9 @@
-from django.shortcuts import render
 from rest_framework import viewsets
-from django.core import serializers
 from .models import Notification
 from .serializers import NotificationSerializer
 import redis
 import json
+from .redisConfig import RedisWrapper
 # Create your views here.
 
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -38,8 +37,11 @@ class NotificationViewSet(viewsets.ModelViewSet):
         response_data['broadcast'] = 1 if obj['broadcast'] else 0
         print(response_data)
         try:
-            r = redis.StrictRedis(host='localhost', port=6379, db=0)
-            r.publish('notification', json.dumps(response_data))
+            r_server = RedisWrapper().redis_connect(server_key='local_server')
+            r_server.ping()
+
+            # r = redis.StrictRedis(host='localhost', port=6379, db=0)
+            r_server.publish('notification', json.dumps(response_data))
         except Exception:
             print('cannot connect to redis server')
             print(Exception)

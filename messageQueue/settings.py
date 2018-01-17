@@ -130,3 +130,13 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+
+REDIS_SERVER_CONF = {
+    'servers': {
+      'local_server': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DATABASE':0
+    }
+  }
+}
