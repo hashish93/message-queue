@@ -5,9 +5,8 @@ from rest_framework import status
 from .serializers import UserSerializer
 from django.contrib.auth.models import User
 from redis import Redis
-import json
 from notification.views import NotificationViewSet
-from notification.models import Notification
+
 # Create your views here.
 
 # ViewSets define the view behavior.
@@ -21,7 +20,8 @@ class UserViewSet(viewsets.ModelViewSet):
         print(request.data)
         print('hello from create')
         user = User.objects.create_user(request.data['username'], request.data['email'])
-        notificationObj = {'user_id': 1, 'message': '', 'is_read': False}
+        notificationObj = {'user_ids': [1, 4, 6], 'message': 'message from backend ',
+                           'broadcast': True}
         NotificationViewSet.createNotification(notificationObj)
         return Response("user created successfully", status=status.HTTP_200_OK)
 
