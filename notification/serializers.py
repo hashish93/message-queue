@@ -10,12 +10,12 @@ class UserSerializer(serializers.ModelSerializer):
 class NotificationSerializer(serializers.Serializer):
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user',
                                                           allow_null=False, required=True)
-    user = UserSerializer(read_only=True, required=False)
-
+    message = serializers.CharField(max_length=1023)
+    created_Date = serializers.DateTimeField()
+    is_read = serializers.BooleanField(default=False)
     class Meta:
         model = Notification
         fields = ('id'
-                  'user',
                   'user_id',
                   'is_read',
                   'created_Date'
