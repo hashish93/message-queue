@@ -1,13 +1,12 @@
 from rest_framework import viewsets
 from .models import Notification
 from .serializers import NotificationSerializer
-import json
-from .redisConfig import RedisWrapper
+from .tasks import pushNotification
 
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-
+    number = 1
     def createNotification(obj):
         for id in obj['user_ids']:
             notification = Notification()
@@ -18,7 +17,8 @@ class NotificationViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 print(e)
                 return None
-        NotificationViewSet.pushNotification(NotificationViewSet, obj)
+        # push bulk notification to certain users
+        pushNotification(obj)
         return notification
 
     def perform_create(self, serializer):
@@ -26,16 +26,3 @@ class NotificationViewSet(viewsets.ModelViewSet):
             obj = serializer.save()
         return obj
 
-    def pushNotification(self, obj):
-        response_data = {}
-        response_data['msg'] = obj['message']
-        response_data['toIds'] = obj['user_ids'],
-        response_data['broadcast'] = 1 if obj['broadcast'] else 0
-        print(response_data)
-        try:
-            r_server = RedisWrapper().redis_connect(server_key='local_server')
-            r_server.ping()
-            r_server.publish('notification', json.dumps(response_data))
-        except Exception:
-            print('cannot connect to redis server')
-            print(Exception)
